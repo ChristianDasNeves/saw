@@ -26,6 +26,7 @@ simply add .ico files to the ICO folder prepended with the file extension (eg: j
 - .wsh
 
 This tool can also be used to completely disable wscript and users will be presented with the following message when they try to run any file ran by wscript.exe or cscript.exe
+
 ![disable](img/disable.png)
 
 Help:
