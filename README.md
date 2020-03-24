@@ -11,6 +11,7 @@ The idea of this script is to reduce the abuse of the scroll icon for js and vbs
 This tool is also able to disable or enable wscript.exe and cscript completely with the flag `-d` and `-e` respectively.
 
 # Usage
+
 This scrip must be run as administrator as it changes registry keys.
 Basic usage of this script will change the icons:
 ![before_after.png](img/before_after.png)
