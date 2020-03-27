@@ -60,5 +60,9 @@ USAGE:
 
 # Changelog
 
+v1.1
 - Change default hive from HKCR to HKLM 
 - Added default behaviour switch
+
+v1.0
+- initial release
