@@ -34,7 +34,7 @@ This tool can also be used to completely disable wscript and users will be prese
 
 Help:
 ```
-SAW stop abusing wscript v1.0
+SAW stop abusing wscript v1.1
 
 SAW is a batch utility that tries to decrease the chance of Windows Script Host abuse.
 This script can modify some registry keys and also disable wscript.exe .
