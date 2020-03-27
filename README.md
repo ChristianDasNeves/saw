@@ -10,7 +10,7 @@ The idea of this script is to reduce the abuse of the scroll icon for js and vbs
 
 This tool is also able to:
   - disable/enable wscript.exe completely with the flag `-d` and `-e` respectively.
-  - Change default behaviour of script files to edit(open text editor) or restore to open(execute file) 
+  - Change default behaviour of script files to edit(open text editor) `-em` or restore to open(execute file) `-om` 
 
 
 # Usage
