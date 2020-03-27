@@ -6,7 +6,7 @@ goto :init
     echo %__NAME% v%__VERSION%
     echo.
     echo SAW is a batch utility that tries to decrease the chance of Windows Script Host abuse.
-    echo This script can modify some registry keys and also disable both wscript.exe and cscript.exe.
+    echo This script can modify some registry keys and also disable wscript.exe.
     echo Please use at your own risk.
     echo.
     goto :eof
@@ -20,6 +20,11 @@ goto :init
     echo.  -d, --disable-wscript    disable Windows Script Host
     echo.  -e, --enable-wscript     enable Windows script Host
     echo.  -nb, --no-backup         does not create a backup
+    
+    rem echo.  -is, --icon-swap         does not swap icon
+    echo.  -em, --edit-mode         set edit by default (Open text editor)
+    echo.  -om, --open-mode         set open by default (Execute the file)
+
     echo.  -b DIR, --backup-dir     define backup directory
     echo.                           (default is "bkp" in script directory)
     echo.  -r DIR, --restore-dir    define folder where backup is located
@@ -51,7 +56,7 @@ goto :init
 
 :init
     set "__NAME=SAW stop abusing wscript"
-    set "__VERSION=1.0"
+    set "__VERSION=1.1"
     set "__YEAR=2020"
 
     set "__BAT_FILE=%~0"
@@ -62,7 +67,6 @@ goto :init
     set "RestoreDir=%__BAT_PATH%bkp"
     set "IconDir=%__BAT_PATH%ICO"     
     set "NoBackup="
-
 
 :parse
     if "%~1"=="" goto :main
@@ -86,11 +90,27 @@ goto :init
     if /i "%~1"=="-e"         call :wscript_enable      & goto :end
     if /i "%~1"=="--enable-wscript"  call :wscript_enable & goto :end
 
+    
+    rem Set default behaviour to edit
+    if /i "%~1"=="/em"         call :set_edit  & goto :end 
+    if /i "%~1"=="-em"         call :set_edit  & goto :end 
+    if /i "%~1"=="--edit-mode"  call :set_edit  & goto :end 
+
+    rem Set default behaviour to open "execute"
+    if /i "%~1"=="/om"         call :set_open  & goto :end 
+    if /i "%~1"=="-om"         call :set_open  & goto :end 
+    if /i "%~1"=="--open-mode"  call :set_open  & goto :end 
+
     rem No backup params
     if /i "%~1"=="/nb"         set "NoBackup=yes"  & shift & goto :parse
     if /i "%~1"=="-nb"         set "NoBackup=yes"  & shift & goto :parse
     if /i "%~1"=="--no-backup"  set "NoBackup=yes"  & shift & goto :parse
 
+    rem Disable icon swap
+    rem if /i "%~1"=="/is"         set "NoIconSwap=yes"  & shift & goto :parse
+    rem if /i "%~1"=="-is"         set "NoIconSwap=yes"  & shift & goto :parse
+    rem if /i "%~1"=="--icon-swap"  set "NoIconSwap=yes"  & shift & goto :parse
+    
     rem Backup params
     if /i "%~1"=="/b"         set "BackupDir=%~2"  & shift & goto :parse
     if /i "%~1"=="-b"         set "BackupDir=%~2"  & shift & goto :parse
@@ -149,6 +169,24 @@ goto :init
     reg add "HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings" /t REG_DWORD /v Enabled /d 1 /f > nul 2>&1
     goto :eof
 
+:set_open
+    reg add HKLM\SOFTWARE\Classes\JSEFile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\JSFile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\VBEFile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\VBSFile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\WSFile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\WSHile\Shell /t REG_SZ /d Open /f > nul 2>&1
+    goto :eof
+
+:set_edit
+    reg add HKLM\SOFTWARE\Classes\JSEFile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\JSFile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\VBEFile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\VBSFile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\WSFile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    reg add HKLM\SOFTWARE\Classes\WSHile\Shell /t REG_SZ /d Edit /f > nul 2>&1
+    goto :eof
+
 :reg_restore
     echo Backup directory used: "%RestoreDir%"
     reg import "%RestoreDir%"\js_bkp.reg > nul 2>&1
@@ -161,52 +199,52 @@ goto :init
     goto :end
 
 :reg_backup
-    reg export HKCR\JSFile\DefaultIcon "%BackupDir%"\js_bkp.reg /y > nul 2>&1
-    reg export HKCR\JSEFile\DefaultIcon "%BackupDir%"\jse_bkp.reg /y > nul 2>&1
-    reg export HKCR\VBEFile\DefaultIcon "%BackupDir%"\vbe_bkp.reg /y > nul 2>&1
-    reg export HKCR\VBSFile\DefaultIcon "%BackupDir%"\vbs_bkp.reg /y > nul 2>&1
-    reg export HKCR\WSFFile\DefaultIcon "%BackupDir%"\wsf_bkp.reg /y > nul 2>&1
-    reg export HKCR\WSHFile\DefaultIcon "%BackupDir%"\wsh_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\JSFile\DefaultIcon "%BackupDir%"\js_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\JSEFile\DefaultIcon "%BackupDir%"\jse_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\VBEFile\DefaultIcon "%BackupDir%"\vbe_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\VBSFile\DefaultIcon "%BackupDir%"\vbs_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\WSFFile\DefaultIcon "%BackupDir%"\wsf_bkp.reg /y > nul 2>&1
+    reg export HKLM\SOFTWARE\Classes\WSHFile\DefaultIcon "%BackupDir%"\wsh_bkp.reg /y > nul 2>&1
 
 :icon_swaper
     echo Replace current icons with icons on folder: "%IconDir%"
 
     if exist "%IconDir%"\js.ico (
-        reg add HKCR\JSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\js.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\JSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\js.ico,0 /f > nul 2>&1
         echo [+] JS icon successfully changed
     ) else (
         echo [-] js.ico not found
     )
     
     if exist "%IconDir%"\jse.ico (
-        reg add HKCR\JSEFile\DefaultIcon /t REG_SZ /d "%IconDir%"\jse.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\JSEFile\DefaultIcon /t REG_SZ /d "%IconDir%"\jse.ico,0 /f > nul 2>&1
         echo [+] JSE icon successfully changed
     ) else (
         echo [-] jse.ico not found
     )
 
     if exist "%IconDir%"\vbe.ico (
-        reg add HKCR\VBEFile\DefaultIcon /t REG_SZ /d "%IconDir%"\vbe.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\VBEFile\DefaultIcon /t REG_SZ /d "%IconDir%"\vbe.ico,0 /f > nul 2>&1
         echo [+] VBE icon successfully changed
     ) else (
         echo [-] vbe.ico not found
     )
 
     if exist "%IconDir%"\vbs.ico (
-        reg add HKCR\VBSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\vbs.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\VBSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\vbs.ico,0 /f > nul 2>&1
         echo [+] VBS icon successfully changed
     ) else (
         echo [-] vbs.ico not found
     )
 
     if exist "%IconDir%"\wsf.ico (
-        reg add HKCR\WSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\wsf.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\WSFile\DefaultIcon /t REG_SZ /d "%IconDir%"\wsf.ico,0 /f > nul 2>&1
         echo [+] WSF icon successfully changed
     ) else (
         echo [-] wsf.ico not found
     )
     if exist "%IconDir%"\wsh.ico (
-        reg add HKCR\WSHile\DefaultIcon /t REG_SZ /d "%IconDir%"\wsh.ico,0 /f > nul 2>&1
+        reg add HKLM\SOFTWARE\Classes\WSHile\DefaultIcon /t REG_SZ /d "%IconDir%"\wsh.ico,0 /f > nul 2>&1
         echo [+] WSH icon successfully changed
     ) else (
         echo [-] wsh.ico not found
